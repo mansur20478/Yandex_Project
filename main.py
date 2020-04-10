@@ -71,11 +71,37 @@ class MyWidget(QMainWindow):
                 height = self.frameGeometry().height()
                 x, y = event.x(), event.y()
 
-                self.my_coord[0] = self.my_coord[0] + (x - width / 2) * (self.spn * 2 / width)
-                self.my_coord[1] = self.my_coord[1] - (y - height / 2) * (self.spn * 2 / height)
+                x1 = self.my_coord[0] + (x - width / 2) * (self.spn * 2 / width)
+                y1 = self.my_coord[1] - (y - height / 2) * (self.spn * 2 / height)
 
-                self.to_search = get_info(str(self.my_coord[0]) + "," + str(self.my_coord[1]))
-                self.update_photo()
+                to_search = get_info(str(x1) + "," + str(y1))
+                if to_search['coord'] != "":
+                    self.to_search['address'] = to_search['address']
+                    try:
+                        self.to_search['postcode'] = to_search['postcode']
+                    except BaseException as exc:
+                        self.to_search['postcode'] = "-"
+                    self.update_ss()
+                    self.search_line.resize(self.search_line.sizeHint())
+
+            if event.button() == Qt.RightButton:
+                width = self.frameGeometry().width()
+                height = self.frameGeometry().height()
+                x, y = event.x(), event.y()
+
+                x = self.my_coord[0] + (x - width / 2) * (self.spn * 2 / width)
+                y = self.my_coord[1] - (y - height / 2) * (self.spn * 2 / height)
+
+                dad = get_search(str(x) + "," + str(y), "организация")
+                for daddy in dad:
+                    x1, y1 = daddy['geometry']['coordinates']
+                    # print(daddy)
+                    dist = lonlat_distance((x, y), (x1, y1))
+                    if dist <= 50:
+                        self.to_search['address'] = daddy['properties']['name']
+                        self.to_search['postcode'] = "-"
+                        self.update_ss()
+                        break
 
     def change_to_map(self):
         self.map_opt = "map"
@@ -119,6 +145,13 @@ class MyWidget(QMainWindow):
             self.my_coord = list(map(float, str.split(self.to_search['coord'], ",")))
             self.update_photo()
 
+    def update_ss(self):
+        if self.add_postcode:
+            self.search_line.setText(self.to_search['address'] + " Индекс: " + self.to_search['postcode'])
+        else:
+            self.search_line.setText(self.to_search['address'])
+        self.search_line.resize(self.search_line.sizeHint())
+
     def update_photo(self):
         map_params = {
             'll': str(self.my_coord[0]) + "," + str(self.my_coord[1]),
@@ -127,11 +160,7 @@ class MyWidget(QMainWindow):
         }
         if self.to_search['coord'] != "":
             map_params['pt'] = self.to_search['coord']
-            if self.add_postcode:
-                self.search_line.setText(self.to_search['address'] + " Индекс: " + self.to_search['postcode'])
-            else:
-                self.search_line.setText(self.to_search['address'])
-            self.search_line.resize(self.search_line.sizeHint())
+            self.update_ss()
         take_photo(self.photo_path[self.map_opt], map_params)
         self.photo_map.setPixmap(QPixmap(self.photo_path[self.map_opt]))
 
