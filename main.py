@@ -64,24 +64,18 @@ class MyWidget(QMainWindow):
             self.my_coord[1] -= self.coord_step
             self.update_photo()
 
-    # def mousePressEvent(self, event):
-    #     if event.type() == QEvent.MouseButtonPress:
-    #         if event.button() == Qt.LeftButton:
-    #             width = self.frameGeometry().width()
-    #             height = self.frameGeometry().height()
-    #             x, y = event.x(), event.y()
-    #             x1, y1 = width // 2, height // 2
-    #             cx, cy = self.my_coord
-    #
-    #             print(self.my_coord, x1, y1, x, y)
-    #
-    #             self.my_coord[0] = (x * cx) / x1
-    #             self.my_coord[1] = (y * cy) / y1
-    #
-    #             print(self.my_coord)
-    #
-    #             self.to_search = get_info(str(self.my_coord[0]) + "," + str(self.my_coord[1]))
-    #             self.update_photo()
+    def mousePressEvent(self, event):
+        if event.type() == QEvent.MouseButtonPress:
+            if event.button() == Qt.LeftButton:
+                width = self.frameGeometry().width()
+                height = self.frameGeometry().height()
+                x, y = event.x(), event.y()
+
+                self.my_coord[0] = self.my_coord[0] + (x - width / 2) * (self.spn * 2 / width)
+                self.my_coord[1] = self.my_coord[1] - (y - height / 2) * (self.spn * 2 / height)
+
+                self.to_search = get_info(str(self.my_coord[0]) + "," + str(self.my_coord[1]))
+                self.update_photo()
 
     def change_to_map(self):
         self.map_opt = "map"
