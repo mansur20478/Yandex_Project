@@ -1,5 +1,0 @@
-C:\Users\grimson>
-
-cd C:\Users\grimson\desktop
-
-dir
